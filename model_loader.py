@@ -31,7 +31,7 @@ def load_model(model_name, device="cuda" if torch.cuda.is_available() else "cpu"
         raise ValueError(f"Model '{model_name}' not found in the registry.")
 
     print(f"Loading model {model_name} from {model_path}...")
-    model = HookedTransformer.from_pretrained(model_path, device=device)
+    model = HookedTransformer.from_pretrained(model_path, device=device, fold_ln=False)
     print(f"Model loaded successfully on {device}.")
 
     return model
@@ -85,6 +85,8 @@ def gpu_mem_check():
         print(f"Cached GPU Memory: {cached_memory:.2f} GB")
     else:
         print("CUDA is not available. Please check your GPU setup.")
+
+
 
 
 # Example usage in notebook:
