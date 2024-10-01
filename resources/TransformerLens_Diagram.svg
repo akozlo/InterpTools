@@ -27,9 +27,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="4.0000002"
-     inkscape:cx="503.74998"
-     inkscape:cy="642.87497"
+     inkscape:zoom="2.0000001"
+     inkscape:cx="3679.9998"
+     inkscape:cy="542.74997"
      inkscape:window-width="2560"
      inkscape:window-height="1369"
      inkscape:window-x="-8"
@@ -6934,16 +6934,16 @@
          y="56.646851">m = d_model</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:3.35139px;fill:#4d4d4d;stroke-width:0.299197"
+       style="font-size:3.52778px;fill:#4d4d4d;stroke-width:0.299197"
        x="-49.00354"
        y="178.00729"
        id="text1-8-8-9"
        transform="matrix(-0.04432428,-1.0014651,0.99658484,-0.04410829,0,0)"><tspan
          sodipodi:role="line"
          id="tspan1-6-6-6"
-         style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.35139px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#4d4d4d;stroke-width:0.299197"
+         style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52778px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#4d4d4d;stroke-width:0.299197"
          x="-49.00354"
-         y="178.00729">m = n_ctx</tspan></text>
+         y="178.00729">n = n_ctx</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:4.18897px;fill:#5b4667;fill-opacity:1;stroke-width:0.349081"
@@ -8087,8 +8087,8 @@
        style="fill:#dad9d8;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.709251" />
     <path
        id="path21-8"
-       d="m 1026.7388,147.5324 5.9452,8.85777 -5.9452,8.85784 h -0.061 V 147.5324 Z"
-       style="fill:#dad9d8;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.709251" />
+       d="m 1025.1788,146.01105 8.6295,10.80906 -8.6295,10.80915 h -0.089 v -21.61821 z"
+       style="fill:#dad9d8;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.943937" />
     <path
        id="path20-7-9"
        d="m 291.59472,175.13049 h 18.8052"
@@ -9227,6 +9227,17 @@
          y="185.71007">m = 4 x d_model</tspan></text>
     <text
        xml:space="preserve"
+       style="font-size:3.52778px;fill:#47636a;fill-opacity:1;stroke-width:0.264583"
+       x="1006.8485"
+       y="172.47244"
+       id="text1-8-9-3-3-5-1-2-2"><tspan
+         sodipodi:role="line"
+         id="tspan1-6-0-1-9-6-89-2-2"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52778px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#59666a;fill-opacity:1;stroke-width:0.264583"
+         x="1006.8485"
+         y="172.47244">*or other nonlinear fn</tspan></text>
+    <text
+       xml:space="preserve"
        style="font-size:3.52778px;fill:#81a2aa;fill-opacity:1;stroke-width:0.264583"
        x="-154.82025"
        y="853.86279"
@@ -9813,20 +9824,20 @@
          y="191.01762">=</tspan></text>
     <path
        id="path20-6"
-       d="m 1010.8449,156.75683 h 16.5853"
-       style="fill:none;stroke:#dad9d8;stroke-width:13.4314;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
+       d="m 1009.7464,156.75683 h 15.567"
+       style="fill:none;stroke:#dad9d8;stroke-width:13.0126;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
     <text
        xml:space="preserve"
-       style="font-size:6.44469px;fill:#000000;stroke-width:0.311212"
-       x="1044.6949"
-       y="154.01437"
+       style="font-size:6.35px;fill:#000000;stroke-width:0.311212"
+       x="1042.9747"
+       y="154.74127"
        id="text1-8-9-3-3-77-3"
        transform="scale(0.9698197,1.0311195)"><tspan
          sodipodi:role="line"
          id="tspan1-6-0-1-9-82-3"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:6.44469px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';stroke-width:0.311212"
-         x="1044.6949"
-         y="154.01437">GeLU</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:6.35px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';stroke-width:0.311212"
+         x="1042.9747"
+         y="154.74127">GeLU*</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:3.75371px;fill:#954d49;fill-opacity:1;stroke-width:0.312809"
@@ -10493,26 +10504,26 @@
    id="tspan66">–</tspan> mean) / std</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.47357px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';letter-spacing:0px;fill:#000000;stroke-width:0.221522"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.82083px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';letter-spacing:0px;fill:#000000;stroke-width:0.221522"
        x="80.133286"
        y="212.89778"
        id="text3-5-3-8-0-3-5"
        transform="matrix(0.98596033,-6.8130343e-4,7.0083501e-4,1.0142391,0,0)"><tspan
          sodipodi:role="line"
          id="tspan3-9-6-3-0-1-6"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.47357px;font-family:sans-serif;-inkscape-font-specification:sans-serif;letter-spacing:0px;stroke-width:0.221522"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.82083px;font-family:sans-serif;-inkscape-font-specification:sans-serif;letter-spacing:0px;stroke-width:0.221522"
          x="80.133286"
          y="212.89778">ln1.w</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.47357px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';letter-spacing:0px;fill:#000000;stroke-width:0.221522"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.82083px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';letter-spacing:0px;fill:#000000;stroke-width:0.221522"
        x="80.582603"
        y="204.83025"
        id="text3-5-3-8-0-5-3-29"
        transform="matrix(0.98596033,-6.8130343e-4,7.0083501e-4,1.0142391,0,0)"><tspan
          sodipodi:role="line"
          id="tspan3-9-6-3-0-96-2-4"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.47357px;font-family:sans-serif;-inkscape-font-specification:sans-serif;letter-spacing:0px;stroke-width:0.221522"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.82083px;font-family:sans-serif;-inkscape-font-specification:sans-serif;letter-spacing:0px;stroke-width:0.221522"
          x="80.582603"
          y="204.83025">ln1.b</tspan></text>
     <text
@@ -10942,26 +10953,26 @@
          y="220.3526">X</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.47357px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';letter-spacing:0px;fill:#000000;stroke-width:0.221522"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.82083px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';letter-spacing:0px;fill:#000000;stroke-width:0.221522"
        x="808.83502"
        y="207.5752"
        id="text3-5-3-8-0-3-5-9"
        transform="matrix(0.98596033,-6.8130343e-4,7.0083501e-4,1.0142391,0,0)"><tspan
          sodipodi:role="line"
          id="tspan3-9-6-3-0-1-6-4"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.47357px;font-family:sans-serif;-inkscape-font-specification:sans-serif;letter-spacing:0px;stroke-width:0.221522"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.82083px;font-family:sans-serif;-inkscape-font-specification:sans-serif;letter-spacing:0px;stroke-width:0.221522"
          x="808.83502"
          y="207.5752">ln2.w</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.47357px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';letter-spacing:0px;fill:#000000;stroke-width:0.221522"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.82083px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';letter-spacing:0px;fill:#000000;stroke-width:0.221522"
        x="809.2843"
        y="199.50766"
        id="text3-5-3-8-0-5-3-29-0"
        transform="matrix(0.98596033,-6.8130343e-4,7.0083501e-4,1.0142391,0,0)"><tspan
          sodipodi:role="line"
          id="tspan3-9-6-3-0-96-2-4-1"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.47357px;font-family:sans-serif;-inkscape-font-specification:sans-serif;letter-spacing:0px;stroke-width:0.221522"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.82083px;font-family:sans-serif;-inkscape-font-specification:sans-serif;letter-spacing:0px;stroke-width:0.221522"
          x="809.2843"
          y="199.50766">ln2.b</tspan></text>
     <text
