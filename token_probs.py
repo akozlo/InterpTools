@@ -241,6 +241,7 @@ def get_token_probabilities_per_layer(
     model: HookedTransformer,
     input_text: str,
     target_word: str,
+    temperature: float = 1.0,
     random_seed=None
 ) -> dict:
     """
@@ -250,6 +251,8 @@ def get_token_probabilities_per_layer(
         model (HookedTransformer): The HookedTransformer model to use.
         input_text (str): The input text leading up to the target word.
         target_word (str): The word whose probability is to be computed.
+        temperature (float): Temperature for softmax. Defaults to 1.0.
+        random_seed (int, optional): Random seed for reproducibility. Defaults to None.
 
     Returns:
         dict: A dictionary mapping layer numbers to the probability of the target word.
@@ -265,32 +268,34 @@ def get_token_probabilities_per_layer(
     # Initialize dictionary to store probabilities
     probabilities = {}
 
-    # Define a hook function to capture intermediate outputs
-    def hook_fn(activation, hook):
-        layer_num = int(hook.name.split('.')[1])
-        residual = activation
-        normalized = model.blocks[layer_num].ln2(residual)
-        logits = model.unembed(model.ln_final(normalized))
-        probs = torch.softmax(logits, dim=-1)
-        probabilities[layer_num] = probs[0, -1, target_token].item()
-
-    # Create a list of hook points
-    hook_points = [f"blocks.{i}.hook_resid_post" for i in range(num_layers)]
-
-    # Run the model with hooks
+    # Run the model with cache
     with torch.no_grad():
         _, cache = model.run_with_cache(
             input_tokens,
-            return_type="logits",
-            names_filter=hook_points
+            return_type="logits"
         )
 
-    # Apply the hook function to each layer's output
-    for name, activation in cache.items():
-        if name in hook_points:
-            hook_fn(activation, SimpleNamespace(name=name))
+    # Process each layer's output
+    for layer_num in range(num_layers):
+        # Get the residual stream activation after the full layer
+        residual_post = cache[f"blocks.{layer_num}.hook_resid_post"][0, -1]
+        
+        # Apply final layer normalization
+        normalized = model.ln_final(residual_post)
+        
+        # Convert to logits
+        logits = model.unembed(normalized)
+        
+        # Apply temperature and get probabilities
+        probs = torch.softmax(logits / temperature, dim=-1)
+        
+        # Get probability of the target token
+        target_prob = probs[target_token].item()
+        
+        probabilities[layer_num] = target_prob
 
     return probabilities
+
 
 class SimpleNamespace:
     def __init__(self, **kwargs):
@@ -334,64 +339,48 @@ def layer_probs_viz(probabilities):
     plt.show()
 
 def top_probs_by_layer(model, input_text, temperature=1.0, random_seed=None):
-    """
-    Compute and visualize the most probable next-token and its probability for each layer of the model.
-
-    Args:
-        model (HookedTransformer): The HookedTransformer model.
-        input_text (str): The input text leading up to the target word.
-        temperature (float, optional): Temperature for softmax. Defaults to 1.0.
-
-    Returns:
-        pd.DataFrame: A DataFrame containing the results.
-    """
     set_seed(random_seed)
-    # Tokenize input
     input_tokens = model.to_tokens(input_text, prepend_bos=True)
 
-    # Get the number of layers
     num_layers = model.cfg.n_layers
-
-    # Initialize lists to store results
     top_tokens = []
     top_probabilities = []
 
-    # Define a hook function to capture intermediate outputs
-    def hook_fn(activation, hook):
-        layer_num = int(hook.name.split('.')[1])
-        residual = activation
-        normalized = model.blocks[layer_num].ln2(residual)
-        logits = model.unembed(normalized)
-        probs = torch.softmax(logits / temperature, dim=-1)  # Apply temperature to softmax
-        top_n = torch.topk(probs[0, -1], 1)  # Focus on the last token
-        top_tokens.append(model.to_string(top_n.indices[0]))
-        top_probabilities.append(top_n.values[0].item())
-
-    # Create a list of hook points
-    hook_points = [f"blocks.{i}.hook_resid_post" for i in range(num_layers)]
-
-    # Run the model with hooks
+    # Run the model with cache
     with torch.no_grad():
         _, cache = model.run_with_cache(
-            input_tokens,               
-            return_type="logits",
-            names_filter=hook_points
+            input_tokens,
+            return_type="logits"
         )
 
-    # Apply the hook function to each layer's output
-    for name, activation in cache.items():
-        if name in hook_points:
-            hook_fn(activation, SimpleNamespace(name=name))
+    # Process each layer's output
+    for layer_num in range(num_layers):
+        # Get the residual stream activation after the full layer
+        residual_post = cache[f"blocks.{layer_num}.hook_resid_post"][0, -1]
+        
+        # Apply final layer normalization
+        normalized = model.ln_final(residual_post)
+        
+        # Convert to logits
+        logits = model.unembed(normalized)
+        
+        # Apply temperature and get probabilities
+        probs = torch.softmax(logits / temperature, dim=-1)
+        
+        # Get top token and probability
+        top_prob, top_index = probs.max(dim=-1)
+        
+        top_tokens.append(model.to_string(top_index))
+        top_probabilities.append(top_prob.item())
 
-    # Create a DataFrame to store results
-    layers = list(range(1, num_layers + 1))  # Layer numbers from 1 to num_layers
+    # Create and display results
+    layers = list(range(1, num_layers + 1))
     results = pd.DataFrame({
         'Layer': layers,
         'Top Token': top_tokens,
         'Top Probability': top_probabilities
-    })  
+    })
 
-    # Create a styled table
     styled_table = results.style \
         .format({'Top Probability': '{:.3f}'}) \
         .set_table_styles([
@@ -400,7 +389,6 @@ def top_probs_by_layer(model, input_text, temperature=1.0, random_seed=None):
         ]) \
         .set_properties(**{'border-collapse': 'collapse', 'border': '1px solid #d3d3d3'})
 
-    # Display the styled table
     display(styled_table)
     
     return results

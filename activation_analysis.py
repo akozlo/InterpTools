@@ -33,7 +33,7 @@ def activation_agg_sim(tensor1: torch.Tensor, tensor2: torch.Tensor) -> torch.Te
     return cos_sim
 
 
-def compare_activation_similarity(model, prompt1, prompt2, mlp=True, attention=True, resid=True):
+def compare_activation_similarity(model, prompt1, prompt2, mlp=True, attention=True, resid=True, layernorm=True):
     """
     Compare activation patterns between two prompts in a transformer model.
 
@@ -48,9 +48,9 @@ def compare_activation_similarity(model, prompt1, prompt2, mlp=True, attention=T
     Returns:
         message (str): Note about prompt lengths and calculation method.
         layer_similarities (dict): Dictionary of per-layer aggregate similarity scores.
-        layer_padded_similarities (dict): Dictionary of per-layer similarity scores using padding.
+        layer_pairwise_similarities (dict): Dictionary of per-layer pairwise similarity scores.
         cumulative_similarity (float): Cumulative aggregate similarity score across all layers.
-        cumulative_padded_similarity (float): Cumulative similarity score using padding across all layers.
+        cumulative_pairwise_similarity (float): Cumulative pairwise similarity score across all layers.
         final_token_similarities (dict): Dictionary of per-layer final token similarity scores.
         cumulative_final_token_similarity (float): Cumulative final token similarity across all layers.
     """
@@ -71,33 +71,54 @@ def compare_activation_similarity(model, prompt1, prompt2, mlp=True, attention=T
         message = ("Note: prompt1 and prompt2 have different token lengths. "
                    "Activation similarity is therefore calculated through aggregating or padding sequences.")
 
-    # Initialize dictionaries to store activations
-    activations1 = {}
-    activations2 = {}
-
-    # Define a hook function to capture activations
-    def get_activation(name, activations):
-        def hook_fn(value, hook):
-            activations[name] = value.detach()
-        return hook_fn
-
-    # Build the list of hook names based on the specified components
-    layer_names = []
+    # Build the list of activation names we want to analyze
+    activation_names = []
+    
+    # Add non-layer-specific activations
+    activation_names.extend(['hook_embed', 'hook_pos_embed'])
+    
     for i in range(model.cfg.n_layers):
-        if resid:
-            layer_names.append(f'blocks.{i}.hook_resid_post')
-        if attention:
-            layer_names.append(f'blocks.{i}.hook_attn_out')
-        if mlp:
-            layer_names.append(f'blocks.{i}.hook_mlp_out')
+        # Add layer-specific activations
+        activation_names.extend([
+            f'blocks.{i}.hook_resid_pre',
+            f'blocks.{i}.ln1.hook_scale',
+            f'blocks.{i}.ln1.hook_normalized',
+            f'blocks.{i}.attn.hook_q',
+            f'blocks.{i}.attn.hook_k',
+            f'blocks.{i}.attn.hook_v',
+            f'blocks.{i}.attn.hook_attn_scores',
+            f'blocks.{i}.attn.hook_pattern',
+            f'blocks.{i}.attn.hook_z',
+            f'blocks.{i}.hook_attn_out',
+            f'blocks.{i}.hook_resid_mid',
+            f'blocks.{i}.ln2.hook_scale',
+            f'blocks.{i}.ln2.hook_normalized',
+            f'blocks.{i}.mlp.hook_pre',
+            f'blocks.{i}.mlp.hook_post',
+            f'blocks.{i}.hook_mlp_out',
+            f'blocks.{i}.hook_resid_post'
+        ])
+    
+    # Add final layer norm activations
+    activation_names.extend(['ln_final.hook_scale', 'ln_final.hook_normalized'])
 
-    # Capture activations for prompt1
-    hooks = [(name, get_activation(name, activations1)) for name in layer_names]
-    model.run_with_hooks(tokens1, fwd_hooks=hooks)
+    # Filter activations based on user preferences
+    if not mlp:
+        activation_names = [name for name in activation_names if 'mlp' not in name]
+    if not attention:
+        activation_names = [name for name in activation_names if 'attn' not in name]
+    if not resid:
+        activation_names = [name for name in activation_names if 'resid' not in name]
+    if not layernorm:
+        activation_names = [name for name in activation_names if 'ln' not in name]
 
-    # Capture activations for prompt2
-    hooks = [(name, get_activation(name, activations2)) for name in layer_names]
-    model.run_with_hooks(tokens2, fwd_hooks=hooks)
+    # Run the model with caching for both prompts
+    _, cache1 = model.run_with_cache(tokens1)
+    _, cache2 = model.run_with_cache(tokens2)
+
+    # Extract the desired activations from the caches
+    activations1 = {name: cache1[name] for name in activation_names}
+    activations2 = {name: cache2[name] for name in activation_names}
 
     # Initialize variables to store similarity scores
     layer_similarities = {}
@@ -109,9 +130,9 @@ def compare_activation_similarity(model, prompt1, prompt2, mlp=True, attention=T
     final_token_similarities = {}
     cumulative_final_token_similarity = 0.0
 
-    total_layers = len(layer_names)
+    total_layers = len(activation_names)
 
-    for name in layer_names:
+    for name in activation_names:
         # Activations have shape (1, seq_len, hidden_size)
         act1 = activations1[name]  # Shape: (1, seq_len1, hidden_size)
         act2 = activations2[name]  # Shape: (1, seq_len2, hidden_size)
@@ -128,34 +149,24 @@ def compare_activation_similarity(model, prompt1, prompt2, mlp=True, attention=T
         # Ensure activations are on the same device
         act1_mean = act1_mean.to(act2_mean.device)
 
-        # Compute aggregate cosine similarity
-        similarity = F.cosine_similarity(act1_mean, act2_mean, dim=0).item()
-        layer_similarities[name] = similarity
-        cumulative_similarity += similarity
+        # Compute cosine similarity between the two mean vectors
+        aggregate_similarity = F.cosine_similarity(act1_mean, act2_mean, dim=0).item()
+        layer_similarities[name] = aggregate_similarity
+        cumulative_similarity += aggregate_similarity
 
-        ### Similarity Using Padding ###
-        # Determine the maximum sequence length
-        max_seq_len = max(act1.shape[1], act2.shape[1])
-
-        # Pad the activations to the maximum sequence length
-        # Pad act1
-        pad_size1 = max_seq_len - act1.shape[1]
-        pad_act1 = F.pad(act1, (0, 0, 0, pad_size1), "constant", 0)  # Pads sequence dimension
-        # Pad act2
-        pad_size2 = max_seq_len - act2.shape[1]
-        pad_act2 = F.pad(act2, (0, 0, 0, pad_size2), "constant", 0)
-
-        # Flatten activations
-        act1_flat = pad_act1.flatten()
-        act2_flat = pad_act2.flatten()
-
-        # Ensure activations are on the same device
-        act1_flat = act1_flat.to(act2_flat.device)
-
-        # Compute cosine similarity
-        padded_similarity = F.cosine_similarity(act1_flat, act2_flat, dim=0).item()
-        layer_padded_similarities[name] = padded_similarity
-        cumulative_padded_similarity += padded_similarity
+        ### Pairwise Cosine Similarity ###
+        pairwise_similarities = []
+        for token1 in act1:
+            for token2 in act2:
+                similarity = F.cosine_similarity(token1, token2, dim=0).item()
+                pairwise_similarities.append(similarity)
+        
+        # Calculate the mean of all pairwise similarities
+        pairwise_similarity = sum(pairwise_similarities) / len(pairwise_similarities)
+        
+        # Store the pairwise similarity for this layer
+        layer_pairwise_similarities[name] = pairwise_similarity
+        cumulative_pairwise_similarity += pairwise_similarity
 
         ### Final Token Similarity ###
         # Get the final token activations
@@ -182,9 +193,9 @@ def compare_activation_similarity(model, prompt1, prompt2, mlp=True, attention=T
     return (
         message,
         layer_similarities,
-        layer_padded_similarities,
+        layer_pairwise_similarities,
         cumulative_similarity,
-        cumulative_padded_similarity,
+        cumulative_pairwise_similarity,
         final_token_similarities,
         cumulative_final_token_similarity
     )
@@ -213,9 +224,9 @@ def display_activation_similarity_tables(model, prompt1, prompt2, mlp=True, atte
     # Unpack the results
     (message,
      layer_similarities,
-     layer_padded_similarities,
+     layer_pairwise_similarities,
      cumulative_similarity,
-     cumulative_padded_similarity,
+     cumulative_pairwise_similarity,
      final_token_similarities,
      cumulative_final_token_similarity) = results
 
@@ -337,9 +348,9 @@ def display_activation_similarity_plots(model, prompt1, prompt2, mlp=True, atten
     # Unpack the results
     (message,
      layer_similarities,
-     layer_padded_similarities,
+     layer_pairwise_similarities,
      cumulative_similarity,
-     cumulative_padded_similarity,
+     cumulative_pairwise_similarity,
      final_token_similarities,
      cumulative_final_token_similarity) = results
 

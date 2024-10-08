@@ -31,7 +31,7 @@ def list_activation_tensors(model, prompt):
     print("Available activation tensors:")
     for key, shape in activations.items():
         print(f"{key:<{max_length}}   {shape}")
-
+    print("\nCall with cache['{tensor_name}'][0]")
 
 
 def list_weight_matrices(model):
@@ -45,7 +45,7 @@ def list_weight_matrices(model):
 
     for key, value in state_dict.items():
         # Replace block numbers with 'n' using regular expressions
-        new_key = re.sub(r'^blocks\.\d+', 'blocks.n', key)
+        new_key = re.sub(r'^blocks\.\d+', 'blocks[n]', key)
 
         # Store the shape of the tensor
         shape = value.shape
@@ -63,3 +63,4 @@ def list_weight_matrices(model):
     for key in keys_shapes.keys():
         shape = keys_shapes[key]
         print(f"{key:<{max_length}}   {shape}")
+    print("\nCall with model.{weight_name}")
