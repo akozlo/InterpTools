@@ -201,7 +201,6 @@ def compare_activation_similarity(model, prompt1, prompt2, mlp=True, attention=T
     )
 
 
-
 def display_activation_similarity_tables(model, prompt1, prompt2, mlp=True, attention=True, resid=True):
     """
     Computes activation similarities between two prompts and displays the results
